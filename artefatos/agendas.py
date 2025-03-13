@@ -70,7 +70,8 @@ def get_eventos():
     with connect_db() as conn:
         cursor = conn.cursor()
         cursor.execute('SELECT * FROM eventos')
-        eventos = cursor.fetchall()
+        colunas = [desc[0] for desc in cursor.description]
+        eventos = [dict(zip(colunas, row)) for row in cursor.fetchall()]
         return jsonify(eventos)
     
 @app.route('/eventos', methods=['POST'])
@@ -132,7 +133,12 @@ def get_evento(evento_id):
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM eventos WHERE id = ?", (evento_id,))
         evento = cursor.fetchone()
-    return jsonify(evento) if evento else (jsonify({"error": "Evento não encontrado"}), 404)
+        if evento:
+            colunas = [desc[0] for desc in cursor.description]
+            evento_dict = dict(zip(colunas, evento))
+            return jsonify(evento_dict)
+        
+    return (jsonify({"error": "Evento não encontrado"}), 404)
 
 @app.route('/eventos/<int:evento_id>', methods=['PUT'])
 def update_evento(evento_id):
