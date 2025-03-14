@@ -318,39 +318,76 @@ def update_status_evento(evento_id):
         in: path
         type: integer
         required: true
-      - name: body
-        in: body
+        description: "ID do evento a ser atualizado"
+        example: 1
+      - name: estadoAtualAgenda
+        in: formData
+        type: string
         required: true
-        schema:
-          type: object
-          properties:
-            estadoAtualAgenda:
-                type: string
+        enum: ["RECEBIDO", "CONFIRMADO", "ATENDIDO", "CANCELADO"]
+        description: "Novo estado do evento"
+        example: "CONFIRMADO"
+    consumes:
+      - application/x-www-form-urlencoded
     responses:
       200:
         description: Status do Evento atualizado com sucesso
+        content:
+          application/json:
+            example:
+              message: "Status do Evento atualizado com sucesso!"
+              evento: 
+                id: 1
+                estadoAtualAgenda: "CONFIRMADO"
       404:
         description: Evento não encontrado
+        content:
+          application/json:
+            example:
+              error: "Evento não encontrado"
       400:
         description: Erro ao atualizar status do evento
+        content:
+          application/json:
+            example:
+              error: "Erro ao atualizar status do evento"
+              details: "Detalhes do erro"
     """
-    data = request.json
+    estado_atual = request.form.get('estadoAtualAgenda')
+    
+    if not estado_atual:
+        return jsonify({"error": "Estado atual da agenda é obrigatório"}), 400
+    
     try:
         with connect_db() as conn:
             cursor = conn.cursor()
-            cursor.execute("UPDATE eventos SET estadoAtualAgenda = ? WHERE id = ?", (data['estadoAtualAgenda'], evento_id))
+            cursor.execute("UPDATE eventos SET estadoAtualAgenda = ? WHERE id = ?", (estado_atual, evento_id))
             if cursor.rowcount == 0:
                 return jsonify({"error": "Evento não encontrado"}), 404
+            
+            # Buscar o evento atualizado para incluir na resposta
+            cursor.execute("SELECT id, estadoAtualAgenda FROM eventos WHERE id = ?", (evento_id,))
+            evento = cursor.fetchone()
             conn.commit()
-        return jsonify({"message": "Status do Evento atualizado com sucesso!"}), 200
+        
+        # Resposta com corpo separado
+        return jsonify({
+            "message": "Status do Evento atualizado com sucesso!"
+        }), 200, {
+            "evento": {
+                "id": evento[0],
+                "estadoAtualAgenda": evento[1]
+            }
+        }
     except sqlite3.Error as e:
         return jsonify({"error": "Erro ao atualizar status do evento", "details": str(e)}), 400
+
 
 # Criar a tabela de eventos no banco de dados
 if __name__ == '__main__':
     create_table()
 
 # Iniciar a aplicação    
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5001, debug=True)
 
 # FimS
