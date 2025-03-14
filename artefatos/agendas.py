@@ -1,9 +1,11 @@
 import sqlite3
 from flask import Flask, request, jsonify
 from flasgger import Swagger
+from flask_cors import CORS
 import os
 
 app = Flask(__name__)
+CORS(app)  # Permite todas as origens
 
 swagger_config = {
     "headers": [],
