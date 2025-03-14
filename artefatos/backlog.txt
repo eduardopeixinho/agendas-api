@@ -1,0 +1,30 @@
+01 - Definir Linguagem de Programação;
+02 - Definir Servidor para a aplicação;
+03 - Definir solução de Documentação de API;
+04 - Definir estrutura do BD;
+05 - Elaborar script para criação do BD;
+06 - Definir endpoints;
+07 - Elaborar rota para listar todos os eventos da agenda;
+       Testar funcionalidade
+08 - Elaborar rota para criar evento na agenda;
+        Elaborar parâmetros para documentação API no Swagger;
+        Testar funcionalidade
+09 - Elaborar rota para detalhar um evento da agenda;
+        Elaborar parâmetros para documentação API no Swagger;
+        Testar funcionalidade
+10 - Elaborar rota para atualizar dados de um evento da agenda;
+        Elaborar parâmetros para documentação API no Swagger;
+        Testar funcionalidade
+11 - Elaborar rota para excluir um evento da agenda;
+        Elaborar parâmetros para documentação API no Swagger;
+        Testar funcionalidade
+12 - Elaborar rota para atualizar o status do evento da agenda;
+        Elaborar parâmetros para documentação API no Swagger;
+        Testar funcionalidade
+14 - Elaborar dockerfile para criação da imagem docker;
+15 - Criar build da imagem docker;
+16 - Criar container conforme imagem docker;
+       Testar todas as rotas
+17 - Enviar V1 para o Github.
+
+18 - Testar integração com Frontend.
