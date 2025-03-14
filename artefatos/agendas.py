@@ -84,7 +84,7 @@ def get_eventos():
         eventos = [dict(zip(colunas, row)) for row in cursor.fetchall()]
         return jsonify(eventos)
     
-# Rota para criar um novo evento    
+# Rota para criar um novo evento
 @app.route('/eventos', methods=['POST'])
 def create_eventos():
     """Insere um novo Evento
@@ -155,10 +155,21 @@ def create_eventos():
                 (data['titulo'], data['descricao'], data['dataInicio'], data['dataFim'], data['local'], data['estadoAtualAgenda'])
             )
             conn.commit()
-        return jsonify({"message": "Evento criado com sucesso!"}), 201
+            
+            # Obter o evento recém-criado
+            evento_id = cursor.lastrowid
+            cursor.execute("SELECT * FROM eventos WHERE id = ?", (evento_id,))
+            evento = cursor.fetchone()
+            colunas = [desc[0] for desc in cursor.description]
+            evento_dict = dict(zip(colunas, evento))
+        
+        return jsonify({
+            "message": "Evento criado com sucesso!",          
+        }), 201, {
+           "evento": evento_dict
+          }
     except sqlite3.Error as e:
         return jsonify({"error": "Erro ao criar evento", "details": str(e)}), 400
-
 
 # Rota para buscar um evento pelo ID
 @app.route('/eventos/<int:evento_id>', methods=['GET'])
@@ -274,10 +285,23 @@ def update_evento(evento_id):
             )
             if cursor.rowcount == 0:
                 return jsonify({"error": "Evento não encontrado"}), 404
+            
+            # Obter o evento atualizado
+            cursor.execute("SELECT * FROM eventos WHERE id = ?", (evento_id,))
+            evento = cursor.fetchone()
+            colunas = [desc[0] for desc in cursor.description]
+            evento_dict = dict(zip(colunas, evento))
+            
             conn.commit()
-        return jsonify({"message": "Evento atualizado com sucesso!"}), 200
+        
+        return jsonify({
+            "message": "Evento atualizado com sucesso!",            
+        }), 200, {
+           "evento": evento_dict
+          }
     except sqlite3.Error as e:
         return jsonify({"error": "Erro ao atualizar evento", "details": str(e)}), 400
+
 
 # Rota para excluir um evento pelo ID
 @app.route('/eventos/<int:evento_id>', methods=['DELETE'])
@@ -336,9 +360,6 @@ def update_status_evento(evento_id):
           application/json:
             example:
               message: "Status do Evento atualizado com sucesso!"
-              evento: 
-                id: 1
-                estadoAtualAgenda: "CONFIRMADO"
       404:
         description: Evento não encontrado
         content:
