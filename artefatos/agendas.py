@@ -30,12 +30,10 @@ swagger_config = {
             "url": "https://opensource.org/licenses/MIT"
         }
     },
-   'language': 'pt-BR' # Define o idioma como Português do Brasil
+   "lang": "pt-br"  # Define o idioma como Português do Brasil
 }
 
-app.config['SWAGGER'] = swagger_config  # Aplica a configuração
-
-swagger = Swagger(app)
+Swagger(app, config=swagger_config)
 
 # Banco de Dados
 DATABASE = 'database/db_agenda.db'
@@ -146,7 +144,13 @@ def create_eventos():
               error: "Erro ao criar evento"
               details: "Detalhes do erro"
     """
-    data = request.form
+    if request.is_json:
+        # Se for uma requisição com JSON
+        data = request.json
+    else:
+        # Se for uma requisição com formData
+        data = request.form
+
     try:
         with connect_db() as conn:
             cursor = conn.cursor()
@@ -271,7 +275,13 @@ def update_evento(evento_id):
               error: "Erro ao atualizar evento"
               details: "Detalhes do erro"
     """
-    data = request.form
+    if request.is_json:
+        # Se for uma requisição com JSON
+        data = request.json
+    else:
+        # Se for uma requisição com formData
+        data = request.form
+
     try:
         with connect_db() as conn:
             cursor = conn.cursor()
@@ -374,7 +384,14 @@ def update_status_evento(evento_id):
               error: "Erro ao atualizar status do evento"
               details: "Detalhes do erro"
     """
-    estado_atual = request.form.get('estadoAtualAgenda')
+    
+    # Verifica se a requisição é JSON ou formData e ajusta accordingly
+    if request.is_json:
+        # Se for uma requisição com JSON
+        estado_atual = request.json.get('estadoAtualAgenda')
+    else:
+        # Se for uma requisição com formData
+        estado_atual = request.form.get('estadoAtualAgenda')
     
     if not estado_atual:
         return jsonify({"error": "Estado atual da agenda é obrigatório"}), 400
